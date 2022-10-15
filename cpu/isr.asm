@@ -53,9 +53,27 @@ isr_install:
     ret
 
 irq1:
-	push byte 1
-	push byte 33
-	jmp irq_common_stub
+    cli
+
+    mov al,  0x61
+    out 0x20, al 
+    in  al,  0x60
+
+    mov bl, al
+    cmp bl, 0x80
+    ja release
+    
+    mov [tmp], al
+    mov [tmp + 1], byte 0
+    
+    mov edx, tmp
+    call print_string
+
+    mov al, 0x20
+    out 0x20, al
+
+    release:
+    iret
 
 irq_common_stub:
     pusha
@@ -78,17 +96,22 @@ irq_common_stub:
     mov gs, bx
     popa
     add esp, 8
+    sti
     iret
 
 
 irq_handler:
+    pusha
     mov edx, testintstr
     call print_string
+    popa
+
     mov al, 0x20
+    out 0x20, al
     out 0x20, al
     ret
 
-tmp: db 0,0
+tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
