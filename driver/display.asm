@@ -128,5 +128,11 @@ print_backspace:
 
     ret
 
-
+print_enter:
+    call get_cursor
+    mov ax, [off]
+    add ax, 160
+    mov bx, ax
+    call set_cursor
+    ret
 off dw 0

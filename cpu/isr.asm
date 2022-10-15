@@ -69,6 +69,12 @@ irq1:
     jmp release
     not_backspace:
 
+    cmp bl, 0x1c ; Enter
+    jne not_enter
+    call print_enter
+    jmp release
+    not_enter:
+
     mov ebx, scan_code_to_ascii
     add ebx, eax
     mov esi, ebx
