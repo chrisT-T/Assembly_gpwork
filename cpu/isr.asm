@@ -53,10 +53,9 @@ isr_install:
     ret
 
 irq1:
-    cli
-    mov ebx, testintstr
-    call print32
-    iret
+	push byte 1
+	push byte 33
+	jmp irq_common_stub
 
 irq_common_stub:
     pusha
@@ -83,9 +82,9 @@ irq_common_stub:
 
 
 irq_handler:
-    mov ebx, testintstr
-    call print32
-    mov eax, 0x20
+    mov edx, testintstr
+    call print_string
+    mov al, 0x20
     out 0x20, al
     ret
 
@@ -93,4 +92,6 @@ tmp: db 0,0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
+
 %include "boot/print32.asm"
+%include "driver/display.asm"

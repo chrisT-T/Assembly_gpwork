@@ -13,21 +13,21 @@ get_cursor:
 
     ; load the high bit of cursor
     mov al, 14
-    out REG_SCREEN_CTRL, al
-    in al, REG_SCREEN_DATA
-    mov bl, al
+    mov dx, REG_SCREEN_CTRL
+    out dx, al
+    mov dx, REG_SCREEN_DATA 
+    in al, dx
+    mov bh, al
 
     ; load the low bit of cursor
-    mov al, 14
-    out REG_SCREEN_CTRL, al
-    in al, REG_SCREEN_DATA
+    mov al, 15
+    mov dx, REG_SCREEN_CTRL
+    out dx, al
+    mov dx, REG_SCREEN_DATA
+    in al, dx
     mov bl, al
-
-    mov ax, bx
-    mov bl, 2
-    mul bl
-    mov bx, ax
-
+    shl bx, 1
+    mov [off], bx
     popa
     ; result in bx
     ret
@@ -36,27 +36,28 @@ set_cursor:
     ; param: offset in bx
     pusha
 
-    mov ax, bx
-    mov bl, 2
-    div bl
-    mov ax, bx
+    shr bx, 1
 
-    mov eax, 14
-    out REG_SCREEN_CTRL, al
+    mov al, 14
+    mov dx, REG_SCREEN_CTRL
+    out dx, al
     mov al, bh
-    out REG_SCREEN_DATA, al
+    mov dx, REG_SCREEN_DATA
+    out dx, al
 
-    mov eax, 15
-    out REG_SCREEN_CTRL, al
-    mov bh, al
-    out REG_SCREEN_DATA, al
+    mov al, 15
+    mov dx, REG_SCREEN_CTRL
+    out dx, al
+    mov al, bl
+    mov dx, REG_SCREEN_DATA
+    out dx, al
 
     popa
     ret
 
 set_char:
-    ; param: eax: position, ebx target char
-    mov [VIDEO_ADDRESS + eax], ebx
+    ; param: eax: position, bl target char
+    mov [VIDEO_ADDRESS + eax], bl
     inc eax
     mov [VIDEO_ADDRESS + eax], byte WHITE_ON_BLACK
     
@@ -89,4 +90,28 @@ clr_screen:
     ret
 
 print_string:
-    ;param: eax: pos of 
+
+    call get_cursor
+    mov bx, [off]
+    mov eax, 0
+    mov ax, bx
+
+    ; mov eax, 10
+
+    L1:
+        mov bx, [edx]
+        cmp bl, 0
+        je PRINT_LOOP_END
+
+        call set_char
+        add eax, 1
+        add edx, 1
+
+        jmp L1
+    PRINT_LOOP_END:
+    add ax, 1
+    mov bx, ax
+    call set_cursor
+    ret
+
+off dw 0
