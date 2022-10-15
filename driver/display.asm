@@ -57,7 +57,7 @@ set_cursor:
 
 set_char:
     ; param: eax: position, bl target char
-    mov [VIDEO_ADDRESS + eax], bl
+    mov [VIDEO_ADDRESS + eax], bx
     inc eax
     mov [VIDEO_ADDRESS + eax], byte WHITE_ON_BLACK
     
@@ -113,5 +113,20 @@ print_string:
     mov bx, ax
     call set_cursor
     ret
+
+print_backspace:
+    mov eax, 0
+    call get_cursor
+    mov ax, [off]
+    mov bx, ' '
+    sub ax, 2
+    call set_char
+
+    mov bx, [off]
+    sub bx, 2
+    call set_cursor
+
+    ret
+
 
 off dw 0

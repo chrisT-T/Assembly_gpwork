@@ -54,7 +54,7 @@ isr_install:
 
 irq1:
     cli
-
+    mov eax, 0
     mov al,  0x61
     out 0x20, al 
     in  al,  0x60
@@ -63,7 +63,18 @@ irq1:
     cmp bl, 0x80
     ja release
     
-    mov [tmp], al
+    cmp bl, 0x0e ; Backspace
+    jne not_backspace
+    call print_backspace
+    jmp release
+    not_backspace:
+
+    mov ebx, scan_code_to_ascii
+    add ebx, eax
+    mov esi, ebx
+    mov edi, tmp
+    movsb
+    
     mov [tmp + 1], byte 0
     
     mov edx, tmp
@@ -115,6 +126,8 @@ tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
+
+scan_code_to_ascii db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
 
 %include "boot/print32.asm"
 %include "driver/display.asm"
