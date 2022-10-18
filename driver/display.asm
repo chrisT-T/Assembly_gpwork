@@ -135,4 +135,28 @@ print_enter:
     mov bx, ax
     call set_cursor
     ret
+
+print_left:
+    call get_cursor
+    mov ax, [off]
+    sub ax, 2
+    mov bx, ax
+    call set_cursor
+    ret
+
+print_right:
+    call get_cursor
+    mov ax, [off]
+    add ax, 2
+    mov bx, ax
+    call set_cursor
+    ret
+
+print_up:
+    call get_cursor
+    mov ax, [off]
+    sub ax, 160
+    mov bx, ax
+    call set_cursor
+    ret
 off dw 0

@@ -63,6 +63,31 @@ irq1:
     cmp bl, 0x80
     ja release
     
+    cmp bl, 0x4b
+    jne not_left
+    call print_left
+    jmp release
+    not_left:
+
+    cmp bl, 0x4d
+    jne not_right
+    call print_right
+    jmp release
+    not_right:
+
+    cmp bl, 0x48
+    jne not_up
+    call print_up
+    jmp release
+    not_up:
+
+    cmp bl, 0x50 ; down
+    jne not_down
+    call print_enter
+    jmp release
+    not_down:
+
+
     cmp bl, 0x0e ; Backspace
     jne not_backspace
     call print_backspace
