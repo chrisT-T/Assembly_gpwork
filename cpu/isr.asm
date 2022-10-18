@@ -63,6 +63,24 @@ irq1:
     cmp bl, 0x80
     ja release
     
+    cmp bl, 0x3b
+    jne not_f1
+    mov [color_mode], byte 0x0f
+    jmp release
+    not_f1:
+
+    cmp bl, 0x3c
+    jne not_f2
+    mov [color_mode], byte 0x03
+    jmp release
+    not_f2:
+
+    cmp bl, 0x3d
+    jne not_f3
+    mov [color_mode], byte 0x09
+    jmp release
+    not_f3:
+
     cmp bl, 0x4b
     jne not_left
     call print_left
@@ -83,7 +101,7 @@ irq1:
 
     cmp bl, 0x50 ; down
     jne not_down
-    call print_enter
+    call print_down
     jmp release
     not_down:
 

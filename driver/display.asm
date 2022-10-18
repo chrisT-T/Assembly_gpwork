@@ -6,6 +6,7 @@ MAX_COLS equ 80
 WHITE_ON_BLACK equ 0x0f
 REG_SCREEN_CTRL equ 0x3D4
 REG_SCREEN_DATA equ 0x3D5
+color_mode db 0x0f
 
 
 get_cursor:
@@ -59,7 +60,8 @@ set_char:
     ; param: eax: position, bl target char
     mov [VIDEO_ADDRESS + eax], bx
     inc eax
-    mov [VIDEO_ADDRESS + eax], byte WHITE_ON_BLACK
+    mov bl, [color_mode]
+    mov [VIDEO_ADDRESS + eax], bl
     
     ret
 
@@ -129,6 +131,17 @@ print_backspace:
     ret
 
 print_enter:
+    call get_cursor
+    mov ax, [off]
+    add ax, 160
+    mov bl, 160
+    div bl
+    mul bl
+    mov bx, ax
+    call set_cursor
+    ret
+
+print_down:
     call get_cursor
     mov ax, [off]
     add ax, 160
