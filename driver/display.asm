@@ -7,6 +7,7 @@ WHITE_ON_BLACK equ 0x0f
 REG_SCREEN_CTRL equ 0x3D4
 REG_SCREEN_DATA equ 0x3D5
 color_mode db 0x0f
+background db 0x00
 
 
 get_cursor:
@@ -180,5 +181,37 @@ print_up:
     sub ax, 160
     mov bx, ax
     call set_cursor
+    ret
+
+;flash the screen with new background color
+flash_screen:
+    pusha
+
+    mov bl, [color_mode]
+    shl bl, 4
+    shr bl, 4
+    add bl, [background]
+    mov [color_mode], bl
+
+    mov al, [MAX_ROWS]
+    mov bl, [MAX_COLS]
+    mul bl
+    mov ecx, eax
+    mov bx, 2
+    mul bx
+    flash_loop:
+        sub ax, 2
+        pusha
+        
+        mov bl, [VIDEO_ADDRESS + eax + 1]
+        shl bl, 4
+        shr bl, 4
+        add bl, [background]
+        mov [VIDEO_ADDRESS + eax + 1], bl
+
+        popa
+    loop flash_loop
+
+    popa
     ret
 off dw 0

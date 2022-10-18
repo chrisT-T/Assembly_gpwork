@@ -65,21 +65,41 @@ irq1:
     
     cmp bl, 0x3b
     jne not_f1
-    mov [color_mode], byte 0x0f
+    mov bh, 0x0f
+    add bh, [background]
+    mov [color_mode], bh
     jmp release
     not_f1:
 
     cmp bl, 0x3c
     jne not_f2
-    mov [color_mode], byte 0x03
+    mov bh, 0x03
+    add bh, [background]
+    mov [color_mode], bh
     jmp release
     not_f2:
 
     cmp bl, 0x3d
     jne not_f3
-    mov [color_mode], byte 0x09
+    mov bh, 0x09
+    add bh, [background]
+    mov [color_mode], bh
     jmp release
     not_f3:
+
+    cmp bl, 0x3e
+    jne not_f4
+    mov [background], byte 0xf0
+    call flash_screen
+    jmp release
+    not_f4:
+
+    cmp bl, 0x3f
+    jne not_f5
+    mov [background], byte 0x00
+    call flash_screen
+    jmp release
+    not_f5:
 
     cmp bl, 0x4b
     jne not_left
