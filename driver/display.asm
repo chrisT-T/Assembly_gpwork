@@ -116,6 +116,15 @@ print_string:
     call set_cursor
     ret
 
+print_delete:
+    mov eax, 0
+    call get_cursor
+    mov ax, [off]
+    add ax, 2
+    mov bx, ' '
+    call set_char
+    ret
+
 print_backspace:
     mov eax, 0
     call get_cursor

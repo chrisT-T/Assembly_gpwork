@@ -105,6 +105,11 @@ irq1:
     jmp release
     not_down:
 
+    cmp bl, 0x53
+    jne not_delete
+    call print_delete
+    jmp release
+    not_delete:
 
     cmp bl, 0x0e ; Backspace
     jne not_backspace
