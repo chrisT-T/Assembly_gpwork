@@ -183,6 +183,41 @@ print_up:
     call set_cursor
     ret
 
+print_num:
+    pusha
+
+    call get_cursor
+    mov ax, [off]
+    add bl, '0'
+    call set_char
+
+    mov ax, [off]
+    add ax, 2
+    mov bx, ax
+    call set_cursor
+    
+    popa
+    ret
+
+print_byte:
+    ; param: al: target byte
+    mov ah, 0
+    mov bh, 100
+    div bh
+    mov bl, al
+    call print_num
+    
+    mov al, ah
+    mov ah, 0
+    mov bh, 10
+    div bh
+    mov bl, al
+    call print_num
+
+    mov bl, ah
+    call print_num
+
+    ret
 ;flash the screen with new background color
 flash_screen:
     pusha

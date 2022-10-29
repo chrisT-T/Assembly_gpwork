@@ -1,3 +1,4 @@
+mouse_counter dd 0
 
 set_idt_gate:
     ; param n in eax, handler address in ebx
@@ -204,7 +205,23 @@ irq12:
 
     in al, 0x60
 
-    call print_right
+    mov ebx, mouse_data
+    add ebx, [mouse_counter]
+    mov [ebx], al
+
+    add [mouse_counter], dword 1
+    cmp [mouse_counter], dword 4
+    jne not_mouse_end
+        mov [mouse_counter], dword 1
+        mov al, [mouse_data + 1]
+        call print_byte
+        mov al, [mouse_data + 2]
+        call print_byte
+        mov al, [mouse_data + 3]
+        call print_byte
+        call print_right
+    not_mouse_end:
+
     iret
 
 irq_common_stub:
@@ -247,7 +264,7 @@ tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
-
+mouse_data: db 1, 2, 3, 4, 10 dup(0)
 scan_code_to_ascii db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
 
 %include "boot/print32.asm"
