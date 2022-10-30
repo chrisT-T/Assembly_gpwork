@@ -126,6 +126,12 @@ irq1:
     jmp release
     not_f5:
 
+    cmp bl, 0x01 ; esc
+    jne not_esc
+    call print_esc
+    jmp release
+    not_esc:
+
     cmp bl, 0x4b
     jne not_left
     call print_left
@@ -167,6 +173,9 @@ irq1:
     call print_enter
     jmp release
     not_enter:
+
+
+
 
     mov ebx, scan_code_to_ascii
     add ebx, eax
@@ -214,58 +223,96 @@ irq12:
     jne not_mouse_end
         mov [mouse_counter], dword 1
         mov al, [mouse_data + 1]
-        call print_byte
+        ;call print_byte
+        
+        ;call print_byte
+        
+        ;call print_byte
+        ;call print_right
         mov al, [mouse_data + 2]
-        call print_byte
+        add al, [x_move]
+        mov [x_move], al
         mov al, [mouse_data + 3]
-        call print_byte
-        call print_right
+        add al, [y_move] 
+        mov [y_move], al
+        cmp [x_move], byte 30
+        jl not_move_x
+            mov [x_move], byte 0
+            call get_cursor
+            mov ax, [off]
+            mov bl, 160
+            div bl
+            cmp ah, 157
+            jnbe meet_x_right_end
+                mov ax, [off]
+                add ax, 2
+                mov bx, ax
+                call set_cursor
+            meet_x_right_end:
+
+        not_move_x:
+        cmp [x_move], byte 225
+        jnl not_move_x_neg
+            mov [x_move], byte 0
+            call get_cursor
+            mov ax, [off]
+            mov bl, 160
+            div bl
+            cmp ah, 3
+            jb meet_x_left_end
+                mov ax, [off]
+                sub ax, 2
+                mov bx, ax
+                call set_cursor
+            meet_x_left_end:
+
+        not_move_x_neg:
+        cmp [y_move], byte 225
+        jnl not_move_y
+            mov [y_move], byte 0
+            call get_cursor
+            mov ax, [off]
+            mov bl, 160
+            div bl
+            cmp al, 24
+            je meet_y_btm_end
+                mov ax, [off]
+                add ax, 160
+                mov bx, ax
+                call set_cursor
+            meet_y_btm_end:
+
+        not_move_y:
+        cmp [y_move], byte 30
+        jl not_move_y_neg
+            mov [y_move], byte 0
+            call get_cursor
+            mov ax, [off]
+            mov bl, 160
+            div bl
+            cmp al, 0
+            je meet_y_top_end
+                mov ax, [off]
+                sub ax, 160
+                mov bx, ax
+                call set_cursor
+            meet_y_top_end:
+
+        not_move_y_neg:
+
     not_mouse_end:
 
+
     iret
-
-irq_common_stub:
-    pusha
-    mov ax, ds
-    push eax
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
-    push esp
-    call irq_handler 
-    pop ebx  
-
-    pop ebx
-    mov ds, bx
-    mov es, bx
-    mov fs, bx
-    mov gs, bx
-    popa
-    add esp, 8
-    sti
-    iret
-
-
-irq_handler:
-    pusha
-    mov edx, testintstr
-    call print_string
-    popa
-
-    mov al, 0x20
-    out 0x20, al
-    out 0x20, al
-    ret
 
 tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
-mouse_data: db 1, 2, 3, 4, 10 dup(0)
+mouse_data: db 0,0,0,0,0
 scan_code_to_ascii db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
 
+x_move db 0
+y_move db 0
 %include "boot/print32.asm"
 %include "driver/display.asm"

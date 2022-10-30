@@ -183,6 +183,10 @@ print_up:
     call set_cursor
     ret
 
+print_esc:
+    call clr_screen
+    ret
+
 print_num:
     pusha
 
