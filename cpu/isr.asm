@@ -223,8 +223,24 @@ irq12:
     jne not_mouse_end
         mov [mouse_counter], dword 1
         mov al, [mouse_data + 1]
-        ;call print_byte
-        
+        mov [mouse_action], al
+        mov al, [mouse_action]
+
+        cmp [mouse_action], byte 9
+        jne not_left_click
+            mov edx, Rclick
+            call print_string
+            mov [background], byte 0x7A378B
+            call flash_screen
+        not_left_click:
+
+        cmp [mouse_action], byte 10
+        jne not_right_click
+            mov edx, Lclick
+            call print_string
+            mov [background], byte 0x00
+            call flash_screen
+        not_right_click:
         ;call print_byte
         
         ;call print_byte
@@ -309,10 +325,14 @@ tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
 testintstr: db "asdfadsfsadf", 0
+
+Rclick: db "Rclick", 0
+Lclick: db "Lclick", 0
 mouse_data: db 0,0,0,0,0
 scan_code_to_ascii db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
 
 x_move db 0
 y_move db 0
+mouse_action db 0
 %include "boot/print32.asm"
 %include "driver/display.asm"
