@@ -25,16 +25,16 @@ mouse_interrupt_handler:
 
         cmp [mouse_action], byte 9
         jne not_left_click
-            mov edx, Rclick
-            call print_string
-            mov [background], byte 0x7A378B
-            call flash_screen
+            mov edx, Lclick
+            call print_at_bottom
+            mov bl, byte 0x10
+            call flash_bottom
         not_left_click:
 
         cmp [mouse_action], byte 10
         jne not_right_click
-            mov edx, Lclick
-            call print_string
+            mov edx, Rclick
+            call print_at_bottom
             mov [background], byte 0x00
             call flash_screen
         not_right_click:
@@ -117,8 +117,8 @@ mouse_interrupt_handler:
 
     iret
 
-Rclick: db "Rclick", 0
-Lclick: db "Lclick", 0
+Rclick: db "Mouse: Rclick", 0
+Lclick: db "Mouse: Lclick", 0
 mouse_data: db 0,0,0,0,0
 
 x_move db 0

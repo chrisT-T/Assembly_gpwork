@@ -93,7 +93,7 @@ clr_screen:
     ret
 
 print_string:
-
+    pusha
     call get_cursor
     mov bx, [off]
     mov eax, 0
@@ -115,6 +115,7 @@ print_string:
     add ax, 1
     mov bx, ax
     call set_cursor
+    popa
     ret
 
 print_delete:
@@ -225,6 +226,44 @@ print_byte:
 
     ret
 
+print_at_bottom:
+    pusha
+
+    call get_cursor
+    mov bx, [off]
+    mov [off_tmp], bx
+
+    mov bx, 24 * 160 + 40
+    call set_cursor
+    call print_string
+
+    mov edx, row_msg
+    call print_string
+
+    call print_right
+    mov ax, [off_tmp]
+    mov bl, 160
+    div bl
+
+    push eax
+    call print_byte
+    call print_right
+    pop eax
+
+    mov edx, col_msg
+    call print_string
+
+    mov al, ah
+    shr al, 1
+    call print_byte
+
+    mov bx, 0
+    mov bx, [off_tmp]
+    call set_cursor
+
+    popa
+    ret
+
 ;flash the screen with new background color
 flash_screen:
     pusha
@@ -256,4 +295,31 @@ flash_screen:
 
     popa
     ret
+
+flash_bottom:
+    pusha
+    add [bottom_color], bl
+    mov ecx, 80
+    mov eax, 25 * 160
+
+    flash_btm_loop:
+        sub ax, 2
+        pusha
+        
+        mov bl, [VIDEO_ADDRESS + eax + 1]
+        shl bl, 4
+        shr bl, 4
+        add bl, [bottom_color]
+        mov [VIDEO_ADDRESS + eax + 1], bl
+
+        popa
+    loop flash_btm_loop
+
+    popa
+    ret
+
 off dw 0
+off_tmp dw 0
+row_msg db " At Row:", 0
+col_msg db "Col:", 0
+bottom_color db 0x00
