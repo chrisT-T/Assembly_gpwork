@@ -1,7 +1,7 @@
 %ifndef MOUSE_DRIVER
 %define MOUSE_DRIVER
 ; mouse interrupt handler
-irq12:
+mouse_interrupt_handler:
     cli
 
     mov al, 0x20
@@ -124,4 +124,6 @@ mouse_data: db 0,0,0,0,0
 x_move db 0
 y_move db 0
 mouse_action db 0
+mouse_counter dd 0
+
 %endif

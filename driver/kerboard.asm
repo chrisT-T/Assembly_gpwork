@@ -1,7 +1,7 @@
 %ifndef KEYBOARD_DRIVER
 %define KEYBOARD_DRIVER
 ; kerboard interrupt handler
-irq1:
+keyboard_interrupt_handler:
     cli
     mov eax, 0
     mov al,  0x61

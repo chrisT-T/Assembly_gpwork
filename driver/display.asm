@@ -187,6 +187,7 @@ print_esc:
     call clr_screen
     ret
 
+; print a single digit on the screen
 print_num:
     pusha
 
@@ -203,6 +204,7 @@ print_num:
     popa
     ret
 
+;print a byte on the screen, the format is 000d
 print_byte:
     ; param: al: target byte
     mov ah, 0
@@ -222,6 +224,7 @@ print_byte:
     call print_num
 
     ret
+
 ;flash the screen with new background color
 flash_screen:
     pusha

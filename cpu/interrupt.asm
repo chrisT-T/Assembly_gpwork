@@ -1,5 +1,3 @@
-mouse_counter dd 0
-
 set_idt_gate:
     ; param n in eax, handler address in ebx
     mov [idt_gate + eax], bx
@@ -36,35 +34,37 @@ isr_install:
     mov eax, 0x01
     out 0xa1, al
 
-    ; OCW 1
+    ; OCW 1, only interrupt 1, 2 open
+    ; 1: keyboard interrupt
+    ; 2: connect the second chip
     mov al, 11111001b
     out 0x21, al
 
-    ; OCW 2
+    ; OCW 2, only interrupt 4 open
+    ; 4: mouse interrupt
     mov  al, 11101111b	
     out  0xa1, al		
 
     ; install keyboard interrupt:  IRQ1
-    mov eax, 33 * 8
-    mov ebx, irq1
+    mov eax, (32 + 1) * 8
+    mov ebx, keyboard_interrupt_handler
     call set_idt_gate
 
-    ; install keyboard interrupt:  IRQ12
-    mov eax, 44 * 8
-    mov ebx, irq12
+    ; install mouse interrupt:  IRQ12
+    mov eax, (32 + 12) * 8
+    mov ebx, mouse_interrupt_handler
     call set_idt_gate
 
-    mov [idt_register], word 4095 ; 256 * 16 - 1
-    
+    mov [idt_register], word 256 * 16 - 1
     mov [idt_register + 2], dword idt_gate
+
     lidt [idt_register]
 
     call init_keyboard_circuit
 
     ret
 
-
-
+; wait until the keyboard circuit ready
 kbc_ready:
     kbc_ready_loop:
         in al, 0x64 ;sta
@@ -75,6 +75,7 @@ kbc_ready:
     kbc_ready_ret:
     ret
 
+; send control cmd to port, initialize the keyboard circuit to use mouse
 init_keyboard_circuit:
     call kbc_ready
     mov al, 0x60

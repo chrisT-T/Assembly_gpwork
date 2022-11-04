@@ -1,7 +1,5 @@
 global main
 
-
-
 [bits 32]
 
 main:
