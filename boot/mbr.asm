@@ -62,8 +62,6 @@ init_protect_mode:
     call begin_pm
 
 BOOT_DRIVE db 0
-test32_string: db "Msg from N", 0
-test_string: db "Msg from NASM", 0
 
 times 510 - ($-$$) db 0
 dw 0xaa55

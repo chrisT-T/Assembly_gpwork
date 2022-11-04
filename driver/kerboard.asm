@@ -9,6 +9,25 @@ irq1:
     in  al,  0x60
 
     mov bl, al
+
+    cmp bl, 0x2a
+    jne not_lshift_mark
+    mov[shift_flag], byte 1
+    jmp release
+    not_lshift_mark
+
+    cmp bl, 0xaa
+    jne not_lshift_break
+    mov [shift_flag], byte 0
+    jmp release
+    not_lshift_break
+
+    cmp bl, 0x3a
+    jne not_caps_mark
+    xor [caps_flag], byte 1
+    jmp release
+    not_caps_mark
+
     cmp bl, 0x80
     ja release
     
@@ -98,10 +117,24 @@ irq1:
     jmp release
     not_enter:
 
+    cmp [shift_flag], byte 1
+    jne not_shift_pressing
+        cmp [caps_flag], byte 1
+        jne not_upper_in_shift
+        mov ebx, scan_code_to_ascii_upper_shift
+        jmp alphabet_select_finish
+        not_upper_in_shift:
+        mov ebx, scan_code_to_ascii_lower_shift
+        jmp alphabet_select_finish
+    not_shift_pressing:
+        cmp [caps_flag], byte 1
+        jne not_upper_in_noshift
+        mov ebx, scan_code_to_ascii_upper
+        jmp alphabet_select_finish
+        not_upper_in_noshift:
+        mov ebx, scan_code_to_ascii_lower
+    alphabet_select_finish:
 
-
-
-    mov ebx, scan_code_to_ascii
     add ebx, eax
     mov esi, ebx
     mov edi, tmp
@@ -121,6 +154,14 @@ irq1:
 tmp: db '0',0
 idt_gate: times 4096 db 0
 idt_register: times 6 db 0
-scan_code_to_ascii db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
+
+shift_flag: db 0
+caps_flag: db 0
+
+scan_code_to_ascii_lower db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '?', '?', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', 39 , '`', '?', 92, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '?', '?', '?', ' ', 0
+scan_code_to_ascii_upper db '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', 0
+
+scan_code_to_ascii_lower_shift db '?', '?', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '?', '?', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '{', '}', '?', '?', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ':', 39 , '`', '?', 92, 'z', 'x', 'c', 'v', 'b', 'n', 'm', '<', '>', '?', '?', '?', '?', ' ', 0
+scan_code_to_ascii_upper_shift db '?', '?', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '?', '?', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', 39 , '`', '?', 92, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', '?', '?', '?', ' ', 0
 
 %endif
