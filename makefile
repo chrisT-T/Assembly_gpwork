@@ -3,20 +3,19 @@
 # $^ = all dependencies
 
 # detect all .o files based on their .c source
-C_SOURCES = $(wildcard cpu/*.c)
 ASM_SOURCES = $(wildcard kernel/*.asm drivers/*.asm cpu/*.asm)
 HEADERS = $(wildcard kernel/*.h  drivers/*.h cpu/*.h)
-OBJ_FILES = ${ASM_SOURCES:.asm=.o cpu/isr.o}
+OBJ_FILES = ${ASM_SOURCES:.asm=.o cpu/interrupt.o}
 
 # First rule is the one executed when no parameters are fed to the Makefile
 all: run
 
 # Notice how dependencies are built as needed
-kernel.bin: boot/entry.o ${OBJ_FILES}
+kernel.bin: ${OBJ_FILES}
 	x86_64-elf-ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
 
-os-image.bin: boot/test.bin kernel.bin
-	type boot\test.bin kernel.bin > $@
+os-image.bin: boot/mbr.bin kernel.bin
+	type boot\mbr.bin kernel.bin > $@
 
 run: os-image.bin
 	qemu-system-i386 -fda $<
